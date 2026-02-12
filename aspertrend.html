@@ -1,0 +1,133 @@
+<script>
+
+/* ================= FLOATING PARTICLES ================= */
+for(let i=0;i<30;i++){
+  let p=document.createElement("div");
+  p.classList.add("particle");
+  p.style.left=Math.random()*100+"vw";
+  p.style.animationDuration=(8+Math.random()*8)+"s";
+  document.body.appendChild(p);
+}
+
+/* ================= SCROLL REVEAL ================= */
+const reveals=document.querySelectorAll(".reveal");
+window.addEventListener("scroll",()=>{
+  reveals.forEach(el=>{
+    if(el.getBoundingClientRect().top < window.innerHeight-100){
+      el.classList.add("active");
+    }
+  });
+});
+
+/* ================= ORB 3D (Desktop Only) ================= */
+const orb=document.querySelector(".glow-orb");
+
+if(window.innerWidth > 768){
+  document.addEventListener("mousemove",(e)=>{
+    const rect=orb.getBoundingClientRect();
+    const orbX=rect.left+rect.width/2;
+    const orbY=rect.top+rect.height/2;
+
+    const rotateY=(e.clientX-orbX)/25;
+    const rotateX=(orbY-e.clientY)/25;
+
+    orb.style.transform=
+      `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  });
+}
+
+/* ================= RITUAL CLICK ================= */
+
+let clicks=0;
+const ritualSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-magic-spell-throw-1125.mp3");
+
+function activateRitual(){
+  clicks++;
+  if(clicks===5){
+    orb.classList.add("cracked");
+    ritualSound.play();
+
+    setTimeout(()=>{
+      alert("The Ritual Has Been Activated.");
+    },500);
+  }
+}
+
+/* ================= SCROLL ================= */
+function scrollToSign(){
+  document.getElementById("sign").scrollIntoView({behavior:"smooth"});
+}
+
+/* ================= FORM FLOW ================= */
+
+let step=1;
+let savedName="";
+let submitting=false;
+
+function nextStep(){
+
+  if(submitting) return;
+
+  const box=document.getElementById("formBox");
+
+  if(step===1){
+
+    const name=document.getElementById("name");
+
+    if(!name.value.trim()){
+      name.focus();
+      return;
+    }
+
+    savedName=name.value.trim();
+
+    box.innerHTML=`
+      <input type="email" id="email" placeholder="Your Email">
+      <input type="text" id="code" placeholder="Invite Code (Optional)">
+      <button class="btn" onclick="nextStep()">Enter the Circle</button>
+    `;
+
+    step=2;
+
+  }else{
+
+    const email=document.getElementById("email");
+    const code=document.getElementById("code");
+
+    if(!email.value.trim()){
+      email.focus();
+      return;
+    }
+
+    submitting=true;
+
+    box.innerHTML=`<div style="color:var(--gold);">Aligning Energies...</div>`;
+
+    fetch("YOUR_SCRIPT_URL_HERE", {
+      method:"POST",
+      body:JSON.stringify({
+        name:savedName,
+        email:email.value.trim(),
+        code:code.value.trim()
+      })
+    })
+    .then(res=>res.json())
+    .then(data=>{
+
+      document.getElementById("wave").classList.add("active");
+
+      setTimeout(()=>{
+        document.getElementById("thank").classList.add("active");
+      },900);
+
+    })
+    .catch(err=>{
+      submitting=false;
+      alert("The ritual was interrupted. Try again.");
+      location.reload();
+    });
+
+  }
+}
+
+</script>
